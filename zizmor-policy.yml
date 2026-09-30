@@ -36,6 +36,8 @@ default:
       disable: false
     unsound-contains:
       disable: false
+    use-trusted-publishing:
+      disable: false
 
     # Disabled
     adhoc-packages:
@@ -89,8 +91,6 @@ default:
       disable: true
     unsound-ternary:
       disable: true
-    use-trusted-publishing:
-      disable: true
 
 repositories:
   # Override `default` in specific repositories.
@@ -99,6 +99,8 @@ repositories:
     # Fixing lints it's not worth it.
     rules:
       archived-uses:
+        disable: true
+      use-trusted-publishing:
         disable: true
   rust-lang/ssh2-rs:
     # TODO
@@ -114,6 +116,26 @@ repositories:
     # Blocked by https://github.com/rust-lang/mdBook/pull/3232
     rules:
       ref-confusion:
+        disable: true
+  rust-lang/cargo-bisect-rustc:
+    rules:
+      # TODO
+      use-trusted-publishing:
+        disable: true
+  rust-lang/libz-sys:
+    rules:
+      # TODO
+      use-trusted-publishing:
+        disable: true
+  rust-lang/rust-analyzer:
+    rules:
+      # TODO
+      use-trusted-publishing:
+        disable: true
+  rust-lang/rust-bindgen:
+    rules:
+      # TODO
+      use-trusted-publishing:
         disable: true
   rust-lang/crabwatch:
     # Opt in to the disabled audits that pass for this repository.
