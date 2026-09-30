@@ -36,6 +36,8 @@ default:
       disable: false
     unsound-contains:
       disable: false
+    unsound-ternary:
+      disable: false
     use-trusted-publishing:
       disable: false
 
@@ -89,11 +91,14 @@ default:
       disable: true
     unpinned-uses:
       disable: true
-    unsound-ternary:
-      disable: true
 
 repositories:
   # Override `default` in specific repositories.
+  rust-lang/backtrace-rs:
+    rules:
+      # TODO
+      unsound-ternary:
+        disable: true
   rust-lang/chalk:
     # Chalk is unused at the moment and it's going to be archived soon probably.
     # Fixing lints it's not worth it.
