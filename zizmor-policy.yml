@@ -22,6 +22,8 @@ default:
       disable: false
     known-vulnerable-actions:
       disable: false
+    misfeature:
+      disable: false
     overprovisioned-secrets:
       disable: false
     ref-confusion:
@@ -58,8 +60,6 @@ default:
     github-app:
       disable: true
     github-env:
-      disable: true
-    misfeature:
       disable: true
     obfuscation:
       disable: true
@@ -99,6 +99,16 @@ repositories:
     # Fixing lints it's not worth it.
     rules:
       archived-uses:
+        disable: true
+  rust-lang/ssh2-rs:
+    # TODO
+    rules:
+      misfeature:
+        disable: true
+  rust-lang/rustc-perf:
+    # TODO
+    rules:
+      misfeature:
         disable: true
   rust-lang/mdBook:
     # Blocked by https://github.com/rust-lang/mdBook/pull/3232
