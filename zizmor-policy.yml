@@ -24,6 +24,8 @@ default:
       disable: false
     overprovisioned-secrets:
       disable: false
+    ref-confusion:
+      disable: false
     typosquat-uses:
       disable: false
     unredacted-secrets:
@@ -61,8 +63,6 @@ default:
       disable: true
     obfuscation:
       disable: true
-    ref-confusion:
-      disable: true
     ref-version-mismatch:
       disable: true
     secrets-inherit:
@@ -99,6 +99,11 @@ repositories:
     # Fixing lints it's not worth it.
     rules:
       archived-uses:
+        disable: true
+  rust-lang/mdBook:
+    # Blocked by https://github.com/rust-lang/mdBook/pull/3232
+    rules:
+      ref-confusion:
         disable: true
   rust-lang/crabwatch:
     # Opt in to the disabled audits that pass for this repository.
