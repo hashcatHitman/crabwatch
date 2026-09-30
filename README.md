@@ -14,8 +14,38 @@ It provides:
 ## Checks
 
 Crabwatch runs [zizmor](https://docs.zizmor.sh/) with the
-[`zizmor-default.yml`](./zizmor-default.yml) configuration file, maintained by
-the Rust Infrastructure team.
+[`zizmor-policy.yml`](./zizmor-policy.yml) policy, maintained by the Rust
+Infrastructure team. Its `default` section contains the shared zizmor
+configuration, and `repositories` contains repository-specific overrides.
+
+### Repository overrides
+
+Add an `owner/repository` entry under `repositories` to change a rule's settings
+for that repository, for example to disable a rule or to opt in to a rule that is
+disabled by default.
+Overrides are deep-merged into the default, so unspecified settings are
+inherited, but a list such as `ignore` replaces the default's list rather than
+extending it.
+CI validates the policy's structure and that every repository key is GitHub's
+canonical `owner/repository` name, since the lookup is case-sensitive.
+
+Example (hypothetical):
+
+```yaml
+repositories:
+  rust-lang/rust-clippy:
+    rules:
+      bot-conditions:
+        # Accepted exception for this repository's automation pattern.
+        disable: true
+  rust-lang/rust:
+    rules:
+      bot-conditions:
+        disable: true
+      overprovisioned-secrets:
+        # Temporary exception while its workflows are migrated.
+        disable: true
+```
 
 ## Design principles
 
@@ -41,6 +71,9 @@ The workflow does not run the Crabwatch CLI. The CLI is a separate tool for
 manually auditing repositories with the same configuration.
 
 ## CLI usage
+
+The CLI determines the repository's configuration in the same way as the workflow,
+so you need to install [mikefarah's `yq` v4](https://github.com/mikefarah/yq#install).
 
 Analyze every eligible repository in a GitHub organization:
 

@@ -1,4 +1,5 @@
-# Default zizmor configuration used by crabwatch.
+# Old configuration file, kept for compatibility with older workflows that fetch this path.
+# Current policy is maintained in zizmor-policy.yml.
 #
 # crabwatch runs a curated set of zizmor audits.
 # zizmor has no allow-list, so we need to explicitly disable every audit we don't want to run.

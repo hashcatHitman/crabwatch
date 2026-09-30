@@ -41,6 +41,23 @@ jobs:
       - name: Run tests
         run: cargo test --workspace
 
+      # Overrides must match GitHub's canonical repository names. Catch typos,
+      # renamed/deleted repositories, and incorrect casing before an override is
+      # silently skipped.
+      # Limitation: `github.token` cannot read private repositories, so those fail here with a 404.
+      - name: Validate policy repositories
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for repository in $(yq '.repositories | keys | .[]' zizmor-policy.yml); do
+            canonical=$(gh api "repos/$repository" --jq .full_name)
+            if [[ "$repository" != "$canonical" ]]; then
+              echo "Policy repository '$repository' must use GitHub's canonical name '$canonical'." >&2
+              exit 1
+            fi
+          done
+
   typos:
     name: Typos
     runs-on: ubuntu-24.04

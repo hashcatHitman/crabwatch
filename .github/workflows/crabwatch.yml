@@ -27,11 +27,23 @@ jobs:
           persist-credentials: false
 
       - name: Download crabwatch zizmor config
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh api repos/rust-lang/crabwatch/contents/zizmor-default.yml \
-            -H "Accept: application/vnd.github.raw+json" > zizmor-default.yml
+          gh api repos/rust-lang/crabwatch/contents/zizmor-policy.yml \
+            -H "Accept: application/vnd.github.raw+json" > "$RUNNER_TEMP/zizmor-policy.yml"
+
+          # Apply this repository's overrides to the default configuration.
+          # zizmor-action runs zizmor in a container that mounts only the
+          # workspace, so the config must be written inside it.
+          yq --exit-status \
+            '.default * (.repositories[strenv(GITHUB_REPOSITORY)] // {})' \
+            "$RUNNER_TEMP/zizmor-policy.yml" > crabwatch-zizmor.yml
+
+          echo "::group::Effective zizmor configuration for $GITHUB_REPOSITORY"
+          cat crabwatch-zizmor.yml
+          echo "::endgroup::"
 
       - name: Run zizmor
         # A missing or empty root .github directory has nothing to audit.
@@ -39,7 +51,7 @@ jobs:
         uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
         with:
           advanced-security: false
-          config: zizmor-default.yml
+          config: crabwatch-zizmor.yml
           # Only lint the root .github directory.
           # Ignore nested .github directories because they can belong to
           # vendored projects or test fixtures.

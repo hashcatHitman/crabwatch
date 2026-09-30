@@ -4,7 +4,7 @@ use serde::Deserialize;
 
 pub fn head_commit_query(org: &str, repo: &str) -> String {
     let inner = format!(
-        "query {{ repository(owner: \"{org}\", name: \"{repo}\") {{ defaultBranchRef {{ target {{ oid }} }} }} }}"
+        "query {{ repository(owner: \"{org}\", name: \"{repo}\") {{ nameWithOwner defaultBranchRef {{ target {{ oid }} }} }} }}"
     );
     serde_json::json!({ "query": inner }).to_string()
 }
@@ -14,14 +14,20 @@ pub async fn fetch_head_commit(
     org: &str,
     repo: &str,
     token: &str,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<RepositoryHead> {
     let body = head_commit_query(org, repo);
     let response: GraphQlResponse<GraphQlRepoData> = post_graphql(client, token, body).await?;
     check_graphql_errors(&response.errors)?;
 
     response
-        .head_commit_sha()
+        .head_commit()
         .ok_or_else(|| anyhow!("repository {org}/{repo} not found or has no default branch"))
+}
+
+#[derive(Debug, PartialEq)]
+pub struct RepositoryHead {
+    pub name_with_owner: String,
+    pub sha: String,
 }
 
 async fn post_graphql<T: serde::de::DeserializeOwned>(
@@ -63,11 +69,12 @@ struct GraphQlResponse<T> {
 }
 
 impl GraphQlResponse<GraphQlRepoData> {
-    fn head_commit_sha(self) -> Option<String> {
-        self.data
-            .and_then(|d| d.repository)
-            .and_then(|r| r.default_branch_ref)
-            .map(|b| b.target.oid)
+    fn head_commit(self) -> Option<RepositoryHead> {
+        let repository = self.data?.repository?;
+        Some(RepositoryHead {
+            name_with_owner: repository.name_with_owner,
+            sha: repository.default_branch_ref?.target.oid,
+        })
     }
 }
 
@@ -79,6 +86,7 @@ struct GraphQlRepoData {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Repository {
+    name_with_owner: String,
     default_branch_ref: Option<BranchRef>,
 }
 
@@ -207,7 +215,7 @@ mod tests {
 
     #[test]
     fn head_commit_query_snapshot() {
-        insta::assert_snapshot!(head_commit_query("rust-lang", "crabwatch"), @r#"{"query":"query { repository(owner: \"rust-lang\", name: \"crabwatch\") { defaultBranchRef { target { oid } } } }"}"#);
+        insta::assert_snapshot!(head_commit_query("rust-lang", "crabwatch"), @r#"{"query":"query { repository(owner: \"rust-lang\", name: \"crabwatch\") { nameWithOwner defaultBranchRef { target { oid } } } }"}"#);
     }
 
     #[test]
@@ -253,10 +261,11 @@ mod tests {
     }
 
     #[test]
-    fn parses_successful_response() {
+    fn parses_head_with_canonical_repository_name() {
         let json = r#"{
             "data": {
                 "repository": {
+                    "nameWithOwner": "Example/Canonical-Repo",
                     "defaultBranchRef": {
                         "target": {
                             "oid": "abc123"
@@ -266,16 +275,34 @@ mod tests {
             }
         }"#;
         let parsed: GraphQlResponse<GraphQlRepoData> = serde_json::from_str(json).unwrap();
-        let sha = parsed.head_commit_sha();
-        assert_eq!(sha, Some("abc123".to_string()));
+        assert_eq!(
+            parsed.head_commit(),
+            Some(RepositoryHead {
+                name_with_owner: "Example/Canonical-Repo".to_string(),
+                sha: "abc123".to_string(),
+            })
+        );
     }
 
     #[test]
     fn parses_missing_repository_as_none() {
         let json = r#"{ "data": { "repository": null } }"#;
         let parsed: GraphQlResponse<GraphQlRepoData> = serde_json::from_str(json).unwrap();
-        let sha = parsed.head_commit_sha();
-        assert_eq!(sha, None);
+        assert_eq!(parsed.head_commit(), None);
+    }
+
+    #[test]
+    fn parses_missing_default_branch_as_none() {
+        let json = r#"{
+            "data": {
+                "repository": {
+                    "nameWithOwner": "Example/Empty",
+                    "defaultBranchRef": null
+                }
+            }
+        }"#;
+        let parsed: GraphQlResponse<GraphQlRepoData> = serde_json::from_str(json).unwrap();
+        assert_eq!(parsed.head_commit(), None);
     }
 
     #[test]

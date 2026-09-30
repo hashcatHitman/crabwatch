@@ -3,8 +3,6 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use tokio::process::Command;
 
-const ZIZMOR_CONFIG: &str = include_str!("../zizmor-default.yml");
-const ZIZMOR_CONFIG_FILE: &str = "zizmor-default.yml";
 #[derive(Debug, PartialEq)]
 pub enum ScanOutcome {
     Clean,
@@ -29,30 +27,6 @@ fn zizmor_command(github_path: &Path, config_path: &Path, github_token: &str) ->
         .arg("--strict-collection")
         .arg(github_path);
     command
-}
-
-pub(crate) fn sync_zizmor_config(crabwatch_dir: &Path) -> anyhow::Result<PathBuf> {
-    let config_path = crabwatch_dir.join(ZIZMOR_CONFIG_FILE);
-
-    match std::fs::read(&config_path) {
-        // Config is already present and identical, return early
-        Ok(contents) if contents == ZIZMOR_CONFIG.as_bytes() => return Ok(config_path),
-        // Config is already present but different, overwrite it
-        Ok(_) => {}
-        // Config is not present, create it
-        Err(err) if err.kind() == ErrorKind::NotFound => {}
-        Err(err) => {
-            return Err(err)
-                .with_context(|| format!("failed to read zizmor config at {config_path:?}"));
-        }
-    }
-
-    std::fs::create_dir_all(crabwatch_dir)
-        .with_context(|| format!("failed to create Crabwatch directory at {crabwatch_dir:?}"))?;
-    std::fs::write(&config_path, ZIZMOR_CONFIG)
-        .with_context(|| format!("failed to write zizmor config at {config_path:?}"))?;
-
-    Ok(config_path)
 }
 
 fn root_github_path(repo_path: &Path) -> anyhow::Result<Option<PathBuf>> {
@@ -130,61 +104,12 @@ mod tests {
             "on: push\njobs:\n  publish:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo hello\n",
         )
         .unwrap();
-        let config_dir = tempfile::tempdir().unwrap();
-        let config_path = sync_zizmor_config(config_dir.path()).unwrap();
+        // Never read: without a root `.github`, zizmor is not run.
+        let config_path = Path::new("unused-config.yml");
 
-        let report = scan_workflows(repo.path(), &config_path, "").await.unwrap();
+        let report = scan_workflows(repo.path(), config_path, "").await.unwrap();
 
         assert_eq!(report.outcome, ScanOutcome::NoWorkflows);
         assert_eq!(report.output, "no workflows to scan");
-    }
-
-    #[test]
-    fn creates_config_and_keeps_identical_file() {
-        // The first sync should create the directory and bundled config from scratch.
-        let temp_dir = tempfile::tempdir().unwrap();
-        let crabwatch_dir = temp_dir.path().join("crabwatch");
-        let config_path = sync_zizmor_config(&crabwatch_dir).unwrap();
-
-        // Make the generated file read-only so a second sync can succeed only by
-        // recognizing the identical contents and returning without rewriting it.
-        let original_metadata = std::fs::metadata(&config_path).unwrap();
-        let original_permissions = original_metadata.permissions();
-        let mut read_only_permissions = original_permissions.clone();
-        read_only_permissions.set_readonly(true);
-        std::fs::set_permissions(&config_path, read_only_permissions).unwrap();
-
-        let second_path = sync_zizmor_config(&crabwatch_dir).expect("failed to sync config a second time. Maybe the read-only permission prevented it from being overwritten?");
-        let second_metadata = std::fs::metadata(&second_path).unwrap();
-
-        std::fs::set_permissions(&config_path, original_permissions).unwrap();
-
-        assert_eq!(config_path, second_path);
-        assert_eq!(
-            std::fs::read_to_string(&config_path).unwrap(),
-            ZIZMOR_CONFIG
-        );
-        // The modification time should be preserved because the second sync
-        // should not have rewritten the file.
-        assert_eq!(
-            original_metadata.modified().unwrap(),
-            second_metadata.modified().unwrap()
-        );
-    }
-
-    #[test]
-    fn overwrites_different_config() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let crabwatch_dir = temp_dir.path().join("crabwatch");
-        std::fs::create_dir_all(&crabwatch_dir).unwrap();
-        let config_path = crabwatch_dir.join(ZIZMOR_CONFIG_FILE);
-        std::fs::write(&config_path, "different config").unwrap();
-
-        sync_zizmor_config(&crabwatch_dir).unwrap();
-
-        assert_eq!(
-            std::fs::read_to_string(&config_path).unwrap(),
-            ZIZMOR_CONFIG
-        );
     }
 }
