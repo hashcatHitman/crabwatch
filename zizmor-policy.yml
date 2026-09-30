@@ -1,0 +1,159 @@
+# Zizmor policy used by crabwatch.
+#
+# crabwatch runs a curated set of zizmor audits.
+# zizmor has no allow-list, so we need to explicitly disable every audit we don't want to run.
+default:
+  # Configuration shared by every repository.
+  rules:
+    # Enabled
+    archived-uses:
+      disable: false
+    bot-conditions:
+      disable: false
+    dependabot-execution:
+      disable: false
+    hardcoded-container-credentials:
+      disable: false
+    impostor-commit:
+      disable: false
+    insecure-commands:
+      disable: false
+    insecure-url-scheme:
+      disable: false
+    known-vulnerable-actions:
+      disable: false
+    overprovisioned-secrets:
+      disable: false
+    typosquat-uses:
+      disable: false
+    unredacted-secrets:
+      disable: false
+    unsound-condition:
+      disable: false
+    unsound-contains:
+      disable: false
+
+    # Disabled
+    adhoc-packages:
+      disable: true
+    anonymous-definition:
+      # Disabled because it doesn't have a security impact.
+      disable: true
+    artipacked:
+      disable: true
+    cache-poisoning:
+      disable: true
+    concurrency-limits:
+      disable: true
+    dangerous-triggers:
+      disable: true
+    dependabot-cooldown:
+      disable: true
+    excessive-permissions:
+      disable: true
+    forbidden-uses:
+      disable: true
+    github-app:
+      disable: true
+    github-env:
+      disable: true
+    misfeature:
+      disable: true
+    obfuscation:
+      disable: true
+    ref-confusion:
+      disable: true
+    ref-version-mismatch:
+      disable: true
+    secrets-inherit:
+      disable: true
+    secrets-outside-env:
+      disable: true
+    self-hosted-runner:
+      disable: true
+    self-repository:
+      disable: true
+    stale-action-refs:
+      disable: true
+    superfluous-actions:
+      disable: true
+    template-injection:
+      disable: true
+    undocumented-permissions:
+      disable: true
+    unpinned-images:
+      disable: true
+    unpinned-tools:
+      disable: true
+    unpinned-uses:
+      disable: true
+    unsound-ternary:
+      disable: true
+    use-trusted-publishing:
+      disable: true
+
+repositories:
+  # Override `default` in specific repositories.
+  rust-lang/chalk:
+    # Chalk is unused at the moment and it's going to be archived soon probably.
+    # Fixing lints it's not worth it.
+    rules:
+      archived-uses:
+        disable: true
+  rust-lang/crabwatch:
+    # Opt in to the disabled audits that pass for this repository.
+    rules:
+      adhoc-packages:
+        disable: false
+      anonymous-definition:
+        disable: false
+      artipacked:
+        disable: false
+      cache-poisoning:
+        disable: false
+      concurrency-limits:
+        disable: false
+      dangerous-triggers:
+        disable: false
+      dependabot-cooldown:
+        disable: false
+      excessive-permissions:
+        disable: false
+      forbidden-uses:
+        disable: false
+      github-app:
+        disable: false
+      github-env:
+        disable: false
+      misfeature:
+        disable: false
+      obfuscation:
+        disable: false
+      ref-confusion:
+        disable: false
+      ref-version-mismatch:
+        disable: false
+      secrets-inherit:
+        disable: false
+      secrets-outside-env:
+        disable: false
+      self-hosted-runner:
+        disable: false
+      stale-action-refs:
+        disable: false
+      superfluous-actions:
+        disable: false
+      template-injection:
+        disable: false
+      undocumented-permissions:
+        disable: false
+      unpinned-images:
+        disable: false
+      unpinned-tools:
+        disable: false
+      unpinned-uses:
+        disable: false
+      unsound-ternary:
+        disable: false
+      use-trusted-publishing:
+        disable: false

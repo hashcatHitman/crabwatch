@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 mod clone;
 mod command;
+mod config;
 mod github;
 mod scan;
 mod security_fork;

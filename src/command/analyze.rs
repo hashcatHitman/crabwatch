@@ -1,4 +1,4 @@
-use crate::{clone, github, scan};
+use crate::{clone, config, github, scan};
 use anyhow::{Context as _, anyhow, bail};
 use futures::stream::StreamExt;
 use std::path::{Path, PathBuf};
@@ -104,10 +104,14 @@ async fn analyze_repo(
     client: &reqwest::Client,
     parsed: &ParsedRepo,
     crabwatch_dir: &Path,
-    zizmor_config: &Path,
+    policy: &config::ZizmorPolicy,
     github_token: &str,
 ) -> anyhow::Result<(String, scan::ScanOutcome)> {
-    let sha = github::fetch_head_commit(client, &parsed.org, &parsed.repo, github_token).await?;
+    let head = github::fetch_head_commit(client, &parsed.org, &parsed.repo, github_token).await?;
+    // GitHub's canonical name selects the policy overrides. Kept alive until
+    // the scan finishes; the file is deleted on drop.
+    let config_file = policy.write_config(&head.name_with_owner).await?;
+    let sha = head.sha;
     log::debug!("HEAD commit: {sha}");
     let path = cache_path(parsed, crabwatch_dir, &sha);
     let repo_cache_dir = path
@@ -127,7 +131,7 @@ async fn analyze_repo(
         clone::clone_repo(&parsed.org, &parsed.repo, github_token, &path, &sha).await?;
     }
 
-    let report = scan::scan_workflows(&path, zizmor_config, github_token).await?;
+    let report = scan::scan_workflows(&path, config_file.path(), github_token).await?;
 
     Ok((report.output.trim_end().to_string(), report.outcome))
 }
@@ -140,18 +144,12 @@ pub async fn run(
 ) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
     let crabwatch_dir = crabwatch_dir(cache_dir_override)?;
-    let zizmor_config = scan::sync_zizmor_config(&crabwatch_dir)?;
+    let policy = config::ZizmorPolicy::bundled().await?;
 
     if let Some(repo_arg) = repo_arg {
         let parsed = parse_repo(&repo_arg)?;
-        let (output, outcome) = analyze_repo(
-            &client,
-            &parsed,
-            &crabwatch_dir,
-            &zizmor_config,
-            github_token,
-        )
-        .await?;
+        let (output, outcome) =
+            analyze_repo(&client, &parsed, &crabwatch_dir, &policy, github_token).await?;
         match outcome {
             scan::ScanOutcome::Findings => log::info!("{output}"),
             scan::ScanOutcome::Clean => log::info!("No findings to report."),
@@ -164,7 +162,7 @@ pub async fn run(
 
         let client = &client;
         let crabwatch_dir = &crabwatch_dir;
-        let zizmor_config = &zizmor_config;
+        let policy = &policy;
         let org = &org;
         let mut failures = Vec::new();
         let mut any_findings = false;
@@ -177,8 +175,7 @@ pub async fn run(
                 };
                 async move {
                     let result =
-                        analyze_repo(client, &parsed, crabwatch_dir, zizmor_config, github_token)
-                            .await;
+                        analyze_repo(client, &parsed, crabwatch_dir, policy, github_token).await;
                     (parsed, result)
                 }
             })
