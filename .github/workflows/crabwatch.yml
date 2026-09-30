@@ -22,6 +22,15 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: About Crabwatch
+        shell: bash
+        run: |
+          cat <<'EOF'
+          Crabwatch (https://github.com/rust-lang/crabwatch) audits GitHub Actions workflows across Rust project repositories using zizmor.
+
+          If you encounter issues, ask for help in #t-infra: https://rust-lang.zulipchat.com/#narrow/stream/242791-t-infra
+          EOF
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
