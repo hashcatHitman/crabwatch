@@ -93,3 +93,18 @@ twice if you already have the latest commit.
 
 * [GitHub: required workflows configured through org-wide rulesets](https://docs.github.com/en/enterprise-cloud@latest/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets#require-workflows-to-pass-before-merging)
 * [zizmor documentation](https://docs.zizmor.sh/)
+
+## How to help
+
+Over time, we'll turn on more lints by default for everyone.
+Until then, it would help us a lot if you fix zizmor findings in your repository and opt in to more checks 🙏
+
+To check what zizmor lints fail for your repository:
+
+1. [Install zizmor](https://docs.zizmor.sh/installation/).
+2. Run `zizmor .` in the root directory of your repository.
+   Or `zizmor . --persona=pedantic` if you already pass the basic checks.
+3. Open PRs in your repository to fix those.
+4. Once fixed, open a PR in this repository to enable the lints you solved, so that
+   if they are re-introduced in the future, crabwatch will catch them. Example
+   [here](https://github.com/rust-lang/crabwatch/blob/4630d36d74262fbcbed9c42861737343db167eed/zizmor-policy.yml#L178).
