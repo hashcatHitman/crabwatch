@@ -210,3 +210,7 @@ repositories:
         disable: false
       unpinned-uses:
         disable: false
+  rust-lang/josh-sync:
+    rules:
+      ref-version-mismatch:
+        disable: false
