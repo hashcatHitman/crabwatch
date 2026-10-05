@@ -214,3 +214,5 @@ repositories:
     rules:
       ref-version-mismatch:
         disable: false
+      unpinned-uses:
+        disable: false
