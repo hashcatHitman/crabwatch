@@ -210,5 +210,7 @@ repositories:
         disable: false
       self-repository:
         disable: false
+      stale-action-refs:
+        disable: false
       unpinned-uses:
         disable: false
