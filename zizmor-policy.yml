@@ -214,5 +214,7 @@ repositories:
         disable: false
       superfluous-actions:
         disable: false
+      unpinned-images:
+        disable: false
       unpinned-uses:
         disable: false
