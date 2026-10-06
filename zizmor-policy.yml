@@ -202,7 +202,19 @@ repositories:
         disable: false
   rust-lang/josh-sync:
     rules:
+      adhoc-packages:
+        disable: false
+      dangerous-triggers:
+        disable: false
       ref-version-mismatch:
+        disable: false
+      self-repository:
+        disable: false
+      stale-action-refs:
+        disable: false
+      superfluous-actions:
+        disable: false
+      unpinned-images:
         disable: false
       unpinned-uses:
         disable: false
