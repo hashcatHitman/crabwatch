@@ -204,6 +204,8 @@ repositories:
     rules:
       adhoc-packages:
         disable: false
+      dangerous-triggers:
+        disable: false
       ref-version-mismatch:
         disable: false
       unpinned-uses:
