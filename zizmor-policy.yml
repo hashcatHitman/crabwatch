@@ -208,5 +208,7 @@ repositories:
         disable: false
       ref-version-mismatch:
         disable: false
+      self-repository:
+        disable: false
       unpinned-uses:
         disable: false
