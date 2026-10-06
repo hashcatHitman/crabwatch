@@ -112,16 +112,6 @@ repositories:
         disable: true
       use-trusted-publishing:
         disable: true
-  rust-lang/ssh2-rs:
-    # TODO
-    rules:
-      misfeature:
-        disable: true
-  rust-lang/rustc-perf:
-    # TODO
-    rules:
-      misfeature:
-        disable: true
   rust-lang/mdBook:
     # Blocked by https://github.com/rust-lang/mdBook/pull/3232
     rules:
