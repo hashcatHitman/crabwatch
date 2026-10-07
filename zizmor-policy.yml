@@ -14,8 +14,6 @@ default:
       disable: false
     cache-poisoning:
       disable: false
-    dependabot-execution:
-      disable: false
     github-env:
       disable: false
     hardcoded-container-credentials:
@@ -67,7 +65,13 @@ default:
       disable: true
     dangerous-triggers:
       disable: true
+    # rust-lang repos also adopt Renovate for dependency updates,
+    # hence related Dependabot-related audits are disabled by default.
     dependabot-cooldown:
+      # Repositories using Dependabot should enable this audit
+      disable: true
+    dependabot-execution:
+      # Repositories using Dependabot should enable this audit
       disable: true
     excessive-permissions:
       disable: true
