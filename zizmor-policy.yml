@@ -156,6 +156,8 @@ repositories:
         disable: true
       ref-version-mismatch:
         disable: false
+      stale-action-refs:
+        disable: false
   rust-lang/odht:
     rules:
       obfuscation:
