@@ -154,6 +154,12 @@ repositories:
       github-env:
         # TODO
         disable: true
+      ref-version-mismatch:
+        disable: false
+      stale-action-refs:
+        disable: false
+      unpinned-uses:
+        disable: false
   rust-lang/odht:
     rules:
       obfuscation:
