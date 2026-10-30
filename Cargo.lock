@@ -267,6 +267,7 @@ name = "crabwatch"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "base64",
  "clap",
  "dirs",
  "env_logger",
