@@ -367,6 +367,8 @@ repositories:
     rules:
       artipacked:
         disable: false
+      excessive-permissions:
+        disable: false
       self-repository:
         # TODO
         disable: true
