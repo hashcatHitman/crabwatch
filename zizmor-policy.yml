@@ -381,6 +381,8 @@ repositories:
         disable: false
       undocumented-permissions:
         disable: false
+      unpinned-images:
+        disable: false
   rust-lang/rust-playground:
     rules:
       self-repository:
