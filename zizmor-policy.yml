@@ -377,6 +377,8 @@ repositories:
         disable: false
       superfluous-actions:
         disable: false
+      template-injection:
+        disable: false
   rust-lang/rust-playground:
     rules:
       self-repository:
