@@ -373,6 +373,8 @@ repositories:
         disable: false
       ref-version-mismatch:
         disable: false
+      stale-action-refs:
+        disable: false
   rust-lang/rust-playground:
     rules:
       self-repository:
