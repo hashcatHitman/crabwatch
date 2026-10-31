@@ -365,6 +365,8 @@ repositories:
         disable: true
   rust-lang/miri:
     rules:
+      artipacked:
+        disable: false
       self-repository:
         # TODO
         disable: true
