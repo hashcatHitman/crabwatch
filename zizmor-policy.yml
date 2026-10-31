@@ -375,6 +375,8 @@ repositories:
         disable: false
       stale-action-refs:
         disable: false
+      superfluous-actions:
+        disable: false
   rust-lang/rust-playground:
     rules:
       self-repository:
