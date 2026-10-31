@@ -373,9 +373,6 @@ repositories:
         disable: false
       ref-version-mismatch:
         disable: false
-      self-repository:
-        # TODO
-        disable: true
   rust-lang/rust-playground:
     rules:
       self-repository:
