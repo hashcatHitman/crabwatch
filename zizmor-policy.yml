@@ -561,3 +561,5 @@ repositories:
     rules:
       artipacked:
         disable: false
+      excessive-permissions:
+        disable: false
